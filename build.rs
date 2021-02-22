@@ -23,7 +23,8 @@ fn main() {
         .clang_arg("-x")
         .clang_arg("c++")
         .clang_arg("-std=c++11")
-        .whitelist_type("Image")
+        .whitelist_type("gdcm::Image")
+        .opaque_type("std::.*")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
