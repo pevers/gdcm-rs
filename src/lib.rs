@@ -7,12 +7,11 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 #[cfg(test)]
 mod tests {
   use super::*;
-  use std::mem;
 
   #[test]
   fn test_image_constructor() {
     unsafe {
-      let image = gdcm_Image {
+      let _image = gdcm_Image {
         _base: gdcm_Pixmap::new(),
         SC: gdcm_SwapCode {
           SwapCodeValue: gdcm_SwapCode_SwapCodeType_BigEndian
