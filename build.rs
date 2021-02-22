@@ -6,7 +6,9 @@ use std::path::PathBuf;
 fn main() {
     // Tell cargo to tell rustc to link the system gdcm
     // shared library.
-    println!("cargo:rustc-link-lib=gdcmCommon");
+    println!("cargo:rustc-link-lib=gdcmCommon.3.1");
+    println!("cargo:rustc-link-lib=gdcmMSFF");
+    println!("cargo:rustc-link-search=/usr/local/lib");
 
     // Tell cargo to invalidate the built crate whenever the wrapper changes
     println!("cargo:rerun-if-changed=wrapper.h");
