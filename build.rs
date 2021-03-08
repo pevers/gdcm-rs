@@ -1,43 +1,90 @@
-extern crate bindgen;
-
+// From: https://docs.rs/crate/gdcm_conv/0.1.0/s
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+
+fn build() {
+    // run GDCM cmake
+    let mut cfg = cmake::Config::new("GDCM");
+
+    let dst = cfg
+        .define("GDCM_BUILD_TESTING", "OFF")
+        .define("GDCM_DOCUMENTATION", "OFF")
+        .define("GDCM_BUILD_EXAMPLES", "OFF")
+        .define("GDCM_BUILD_DOCBOOK_MANPAGES", "OFF")
+        .cflag("-fPIC")
+        .cxxflag("-std=c++11")
+        .uses_cxx11()
+        .build_arg("-j8")
+        .build();
+
+    // set GDCM include path
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let include_dir = out_path.join("include").join("gdcm-3.1");
+
+    // create library
+    cc::Build::new()
+        .file("gdcm_wrapper.cc")
+        .cpp(true)
+        .flag("-fPIC")
+        .flag("-std=c++11")
+        .include(include_dir)
+        .compile("gdcm_wrapper");
+
+    // set libs paths
+    println!("cargo:rustc-link-search={}", dst.join("lib").display());
+    println!("cargo:rustc-link-search={}", dst.display());
+
+    // set libs
+    println!("cargo:rustc-link-lib=static=gdcm_wrapper");
+
+    // gdcm libs
+    println!("cargo:rustc-link-lib=static=gdcmMSFF");
+    println!("cargo:rustc-link-lib=static=gdcmcharls");
+    println!("cargo:rustc-link-lib=static=gdcmCommon");
+    println!("cargo:rustc-link-lib=static=gdcmDICT");
+    println!("cargo:rustc-link-lib=static=gdcmDSED");
+    println!("cargo:rustc-link-lib=static=gdcmIOD");
+    println!("cargo:rustc-link-lib=static=gdcmexpat");
+    println!("cargo:rustc-link-lib=static=gdcmjpeg12");
+    println!("cargo:rustc-link-lib=static=gdcmjpeg16");
+    println!("cargo:rustc-link-lib=static=gdcmjpeg8");
+    println!("cargo:rustc-link-lib=static=gdcmopenjp2");
+    println!("cargo:rustc-link-lib=static=gdcmuuid");
+    println!("cargo:rustc-link-lib=static=gdcmMEXD");
+    println!("cargo:rustc-link-lib=static=gdcmzlib");
+
+    // FIXME: OSX ONLY
+    println!("Building for {}", env::consts::OS);
+    match env::consts::OS {
+        "macos" => {
+            println!("cargo:rustc-link-lib=framework=CoreFoundation");
+            println!(
+                "cargo:rustc-link-search=framework={}",
+                "/System/Library/Frameworks"
+            );
+        }
+        _ => {
+            // Probably not supported
+        }
+    };
+}
 
 fn main() {
-    // Tell cargo to tell rustc to link the system gdcm
-    // shared library.
-    println!("cargo:rustc-link-lib=gdcmCommon.3.1");
-    println!("cargo:rustc-link-lib=gdcmMSFF");
-    println!("cargo:rustc-link-search=/usr/local/lib");
-
-    // Tell cargo to invalidate the built crate whenever the wrapper changes
+    // re-build if files change
+    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=gdcm_wrapper.cc");
     println!("cargo:rerun-if-changed=wrapper.h");
 
-    // The bindgen::Builder is the main entry point
-    // to bindgen, and lets you build up options for
-    // the resulting bindings.
-    let bindings = bindgen::Builder::default()
-        // The input header we would like to generate
-        // bindings for.
-        .header("wrapper.h")
-        .clang_arg("-I/usr/local/include/gdcm-3.1")
-        .clang_arg("-L/usr/local/lib")
-        .clang_arg("-x")
-        .clang_arg("c++")
-        .clang_arg("-std=c++11")
-        .whitelist_type("gdcm::Image")
-        .opaque_type("std::.*")
-        // Tell cargo to invalidate the built crate whenever any of the
-        // included header files changed.
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        // Finish the builder and generate the bindings.
-        .generate()
-        // Unwrap the Result and panic on failure.
-        .expect("Unable to generate bindings");
+    // unset DESTDIR envar to avoid others libs destinations
+    env::remove_var("DESTDIR");
 
-    // Write the bindings to the $OUT_DIR/bindings.rs file.
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
+    // update git
+    if !Path::new("GDCM/.git").exists() {
+        let _ = Command::new("git")
+            .args(&["submodule", "update", "--init"])
+            .status();
+    }
+
+    build();
 }

@@ -7,4 +7,16 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-bindgen = "0.57.0"
+cmake = "0.1"
+cc = "1.0.67"
+
+[dependencies]
+libc = "0.2.88"
+
+[lib]
+name = "gdcm_rs"
+path = "src/lib.rs"
+
+[dev-dependencies]
+dicom-test-files = "0.2.0"
+image = "0.23.14"

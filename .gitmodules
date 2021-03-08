@@ -1,0 +1,6 @@
+[submodule "GDCM"]
+	path = GDCM
+	url = git@github.com:malaterre/GDCM.git
+[submodule "gdcm-sys/GDCM"]
+	path = gdcm-sys/GDCM
+	url = git@github.com:malaterre/GDCM.git
