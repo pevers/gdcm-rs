@@ -20,3 +20,5 @@ path = "src/lib.rs"
 [dev-dependencies]
 dicom-test-files = "0.2.0"
 image = "0.23.14"
+dicom-object = { path = "../dicom-rs/object" }
+dicom-core = { path ="../dicom-rs/core" }
