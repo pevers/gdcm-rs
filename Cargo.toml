@@ -12,6 +12,12 @@ cc = "1.0.67"
 
 [dependencies]
 libc = "0.2.88"
+snafu = "0.6.10"
+strum = "0.20"
+strum_macros = "0.20"
+# Will be moved
+byteorder = "1.4.3"
+image = "0.23.14"
 
 [lib]
 name = "gdcm_rs"
@@ -19,6 +25,8 @@ path = "src/lib.rs"
 
 [dev-dependencies]
 dicom-test-files = "0.2.0"
-image = "0.23.14"
 dicom-object = { path = "../dicom-rs/object" }
 dicom-core = { path ="../dicom-rs/core" }
+dicom-transfer-syntax-registry = { path = "../dicom-rs/transfer-syntax-registry" }
+dicom-encoding = { path = "../dicom-rs/encoding" }
+rstest = "0.6.4"
