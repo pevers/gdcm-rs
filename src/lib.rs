@@ -84,9 +84,7 @@ pub enum GDCMTransferSyntax {
 
 pub type InvalidGDCMTS = strum::ParseError;
 
-/// TransferSyntax Type
-pub enum TSType {}
-
+/// Pixel data managed by GDCM
 #[repr(C)]
 struct pixel_data {
     pixel_data: *const c_uchar,
@@ -109,6 +107,7 @@ extern "C" {
     //     pixel_representation: u16,
     // ) -> pixel_data;
 
+    /// Decodes a single frame buffer in GDCM
     fn c_decode_single_frame_compressed(
         i_buffer_ptr: *const c_uchar,
         i_buffer_len: size_t,
@@ -124,7 +123,7 @@ extern "C" {
     ) -> pixel_data;
 }
 
-/// Takes an in-memory dicom-rs PixelData and decodes it
+    /// Decodes a single frame buffer in GDCM
 pub fn decode_single_frame_compressed(
     i_buffer: &Vec<u8>,
     width: u32,
