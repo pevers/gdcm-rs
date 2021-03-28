@@ -18,11 +18,6 @@ struct PixelData {
     size_t size;
 };
 
-MODULE_API PixelData c_decode_dicom_file(
-    char *,     // i_buffer_ptr
-    size_t      // i_buffer_len
-);
-
 // MODULE_API PixelData c_decode_multi_frame_compressed(
 //     char **,                    // i_buffer_ptrs
 //     size_t *,                   // i_buffer_lens
