@@ -1,6 +1,15 @@
 use libc::{c_uchar, c_uint, size_t};
 use std::slice;
 use strum_macros::EnumString;
+use snafu::{ResultExt, Snafu};
+
+#[derive(Debug, Snafu)]
+pub enum Error {
+    #[snafu(display("GDCM decoding error"))]
+    GdcmDecodingError
+}
+
+pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 /// PhotometricInterpretation Type for GDCM
 #[derive(Debug, PartialEq, EnumString)]
@@ -93,20 +102,6 @@ struct pixel_data {
 }
 
 extern "C" {
-    // fn c_decode_multi_frame_compressed(
-    //     i_buffer_ptr: *const *const c_uchar,
-    //     i_buffer_lens: *const size_t,
-    //     i_buffer_len: size_t,
-    //     dims: (i32, i32, i32),
-    //     pi_type: u32,
-    //     ts_type: u32,
-    //     samples_per_pixel: u16,
-    //     bits_allocated: u16,
-    //     bits_stored: u16,
-    //     high_bit: u16,
-    //     pixel_representation: u16,
-    // ) -> pixel_data;
-
     /// Decodes a single frame buffer in GDCM
     fn c_decode_single_frame_compressed(
         i_buffer_ptr: *const c_uchar,
@@ -123,7 +118,7 @@ extern "C" {
     ) -> pixel_data;
 }
 
-    /// Decodes a single frame buffer in GDCM
+/// Decodes a single frame buffer in GDCM
 pub fn decode_single_frame_compressed(
     i_buffer: &Vec<u8>,
     width: u32,
@@ -135,7 +130,7 @@ pub fn decode_single_frame_compressed(
     bits_stored: u16,
     high_bit: u16,
     pixel_representation: u16,
-) -> Result<Box<[u8]>, &'static str> {
+) -> Result<Box<[u8]>, Error> {
     let ret = unsafe {
         c_decode_single_frame_compressed(
             i_buffer.as_ptr(),
@@ -154,8 +149,8 @@ pub fn decode_single_frame_compressed(
     match ret.status {
         0 => unsafe {
             let slice = slice::from_raw_parts_mut(ret.pixel_data as *mut _, ret.size);
-            return Ok(Box::from_raw(slice));
+            Ok(Box::from_raw(slice))
         },
-        _ => return Err("Unknown error."),
+        _ => GdcmDecodingError.fail()
     }
 }
