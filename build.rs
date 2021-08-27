@@ -15,7 +15,6 @@ fn build() {
         .cflag("-fPIC")
         .cxxflag("-std=c++11")
         .uses_cxx11()
-        .build_arg("-j8")
         .build();
 
     // set GDCM include path
