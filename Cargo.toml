@@ -1,6 +1,6 @@
 [package]
 name = "gdcm-rs"
-version = "0.2.0"
+version = "0.3.0"
 description = "GDCM bindings for Rust"
 homepage = "https://github.com/pevers/gdcm-rs"
 repository = "https://github.com/pevers/gdcm-rs"
