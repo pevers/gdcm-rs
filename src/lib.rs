@@ -1,7 +1,7 @@
 use libc::{c_uchar, c_uint, size_t};
 use std::slice;
 use strum_macros::EnumString;
-use snafu::{ResultExt, Snafu};
+use snafu::Snafu;
 
 #[derive(Debug, Snafu)]
 pub enum Error {
