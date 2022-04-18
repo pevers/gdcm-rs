@@ -1,7 +1,7 @@
 use libc::{c_uchar, c_uint, size_t};
+use snafu::Snafu;
 use std::slice;
 use strum_macros::EnumString;
-use snafu::Snafu;
 
 #[derive(Debug, Snafu)]
 pub struct Error(InnerError);
@@ -9,9 +9,7 @@ pub struct Error(InnerError);
 #[derive(Debug, Snafu)]
 enum InnerError {
     #[snafu(display("GDCM decoding error (status code {})", status))]
-    GdcmDecodingError {
-        status: u32,
-    }
+    GdcmDecodingError { status: u32 },
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -121,6 +119,21 @@ extern "C" {
         high_bit: u16,
         pixel_representation: u16,
     ) -> pixel_data;
+
+    /// Decodes a multi frame buffer in GDCM
+    fn c_decode_multi_frame_compressed(
+        i_buffer_ptr: *const *const c_uchar,
+        i_buffer_lens: *const size_t,
+        i_buffer_len: size_t,
+        dims: *const u32,
+        pi_type: u32,
+        ts_type: u32,
+        samples_per_pixel: u16,
+        bits_allocated: u16,
+        bits_stored: u16,
+        high_bit: u16,
+        pixel_representation: u16,
+    ) -> pixel_data;
 }
 
 /// Decodes a single frame buffer in GDCM
@@ -156,8 +169,51 @@ pub fn decode_single_frame_compressed(
             let slice = slice::from_raw_parts_mut(ret.pixel_data as *mut _, ret.size);
             Ok(Box::from_raw(slice))
         },
-        c => GdcmDecodingSnafu {
-            status: c as u32
-        }.fail().map_err(Error::from)
+        c => GdcmDecodingSnafu { status: c as u32 }
+            .fail()
+            .map_err(Error::from),
+    }
+}
+
+/// Decodes a multi frame buffer in GDCM
+pub fn decode_multi_frame_compressed(
+    i_buffers: &Vec<&Vec<u8>>,
+    dims: [u32; 3],
+    pi_type: GDCMPhotometricInterpretation,
+    ts_type: GDCMTransferSyntax,
+    samples_per_pixel: u16,
+    bits_allocated: u16,
+    bits_stored: u16,
+    high_bit: u16,
+    pixel_representation: u16,
+) -> Result<Box<[u8]>, Error> {
+    let i_buffer_lens: Vec<usize> = i_buffers.iter().map(|&fragment| fragment.len()).collect();
+    let i_buffer_pointers: Vec<_> = i_buffers
+        .iter()
+        .map(|&i_buffer| i_buffer.as_ptr())
+        .collect();
+    let ret = unsafe {
+        c_decode_multi_frame_compressed(
+            i_buffer_pointers.as_ptr(),
+            i_buffer_lens.as_ptr(),
+            i_buffers.len(),
+            dims.as_ptr(),
+            pi_type as u32,
+            ts_type as u32,
+            samples_per_pixel,
+            bits_allocated,
+            bits_stored,
+            high_bit,
+            pixel_representation,
+        )
+    };
+    match ret.status {
+        0 => unsafe {
+            let slice = slice::from_raw_parts_mut(ret.pixel_data as *mut _, ret.size);
+            Ok(Box::from_raw(slice))
+        },
+        c => GdcmDecodingSnafu { status: c as u32 }
+            .fail()
+            .map_err(Error::from),
     }
 }

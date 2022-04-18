@@ -1,50 +1,52 @@
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #ifdef _WIN32
-#  ifdef MODULE_API_EXPORTS
-#    define MODULE_API __declspec(dllexport)
-#  else
-#    define MODULE_API __declspec(dllimport)
-#  endif
+#ifdef MODULE_API_EXPORTS
+#define MODULE_API __declspec(dllexport)
 #else
-#  define MODULE_API
+#define MODULE_API __declspec(dllimport)
+#endif
+#else
+#define MODULE_API
 #endif
 
-struct PixelData {
-    char *buffer;
-    unsigned int status;
-    size_t size;
-};
+    struct PixelData
+    {
+        char *buffer;
+        unsigned int status;
+        size_t size;
+    };
 
-// MODULE_API PixelData c_decode_multi_frame_compressed(
-//     char **,                    // i_buffer_ptrs
-//     size_t *,                   // i_buffer_lens
-//     size_t,                     // i_buffer_len
-//     unsigned int[3],            // dims
-//     unsigned int,               // pi_type
-//     unsigned int,               // ts_type
-//     unsigned short,             // samples_per_pixel
-//     unsigned short,             // bits_allocated
-//     unsigned short,             // bits_stored
-//     unsigned short,             // high_bit
-//     unsigned short              // pixel_representation
-// );
+    MODULE_API PixelData c_decode_multi_frame_compressed(
+        char **,         // i_buffer_ptrs
+        size_t *,        // i_buffer_lens
+        size_t,          // i_buffer_len
+        unsigned int[3], // dims
+        unsigned int,    // pi_type
+        unsigned int,    // ts_type
+        unsigned short,  // samples_per_pixel
+        unsigned short,  // bits_allocated
+        unsigned short,  // bits_stored
+        unsigned short,  // high_bit
+        unsigned short   // pixel_representation
+    );
 
-MODULE_API PixelData c_decode_single_frame_compressed(
-    char *,                     // i_buffer_ptr
-    size_t,                     // i_buffer_len
-    unsigned int,               // width
-    unsigned int,               // height
-    unsigned int,               // pi_type
-    unsigned int,               // ts_type
-    unsigned short,             // samples_per_pixel
-    unsigned short,             // bits_allocated
-    unsigned short,             // bits_stored
-    unsigned short,             // high_bit
-    unsigned short              // pixel_representation
-);
+    MODULE_API PixelData c_decode_single_frame_compressed(
+        char *,         // i_buffer_ptr
+        size_t,         // i_buffer_len
+        unsigned int,   // width
+        unsigned int,   // height
+        unsigned int,   // pi_type
+        unsigned int,   // ts_type
+        unsigned short, // samples_per_pixel
+        unsigned short, // bits_allocated
+        unsigned short, // bits_stored
+        unsigned short, // high_bit
+        unsigned short  // pixel_representation
+    );
 
 #ifdef __cplusplus
 }
