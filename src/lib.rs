@@ -4,7 +4,10 @@ use strum_macros::EnumString;
 use snafu::Snafu;
 
 #[derive(Debug, Snafu)]
-pub enum Error {
+pub struct Error(InnerError);
+
+#[derive(Debug, Snafu)]
+enum InnerError {
     #[snafu(display("GDCM decoding error (status code {})", status))]
     GdcmDecodingError {
         status: u32,
@@ -155,6 +158,6 @@ pub fn decode_single_frame_compressed(
         },
         c => GdcmDecodingSnafu {
             status: c as u32
-        }.fail()
+        }.fail().map_err(Error::from)
     }
 }
