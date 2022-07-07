@@ -105,23 +105,8 @@ struct pixel_data {
 }
 
 extern "C" {
-    /// Decodes a single frame buffer in GDCM
-    fn c_decode_single_frame_compressed(
-        i_buffer_ptr: *const c_uchar,
-        i_buffer_len: size_t,
-        width: u32,
-        height: u32,
-        pi_type: u32,
-        ts_type: u32,
-        samples_per_pixel: u16,
-        bits_allocated: u16,
-        bits_stored: u16,
-        high_bit: u16,
-        pixel_representation: u16,
-    ) -> pixel_data;
-
-    /// Decodes a multi frame buffer in GDCM
-    fn c_decode_multi_frame_compressed(
+    /// Decodes frames in GDCM
+    fn c_decode_frames(
         i_buffer_ptr: *const *const c_uchar,
         i_buffer_lens: *const size_t,
         i_buffer_len: size_t,
@@ -138,7 +123,7 @@ extern "C" {
 
 /// Decodes a single frame buffer in GDCM
 pub fn decode_single_frame_compressed(
-    i_buffer: &Vec<u8>,
+    i_buffer: &[u8],
     width: u32,
     height: u32,
     pi_type: GDCMPhotometricInterpretation,
@@ -149,36 +134,25 @@ pub fn decode_single_frame_compressed(
     high_bit: u16,
     pixel_representation: u16,
 ) -> Result<Box<[u8]>, Error> {
-    let ret = unsafe {
-        c_decode_single_frame_compressed(
-            i_buffer.as_ptr(),
-            i_buffer.len(),
-            width,
-            height,
-            pi_type as u32,
-            ts_type as u32,
-            samples_per_pixel,
-            bits_allocated,
-            bits_stored,
-            high_bit,
-            pixel_representation,
-        )
-    };
-    match ret.status {
-        0 => unsafe {
-            let slice = slice::from_raw_parts_mut(ret.pixel_data as *mut _, ret.size);
-            Ok(Box::from_raw(slice))
-        },
-        c => GdcmDecodingSnafu { status: c as u32 }
-            .fail()
-            .map_err(Error::from),
-    }
+    let i_buffers = [i_buffer];
+    let dims = [1, width, height];
+    decode_multi_frame_compressed(
+        &i_buffers,
+        &dims,
+        pi_type,
+        ts_type,
+        samples_per_pixel,
+        bits_allocated,
+        bits_stored,
+        high_bit,
+        pixel_representation,
+    )
 }
 
 /// Decodes a multi frame buffer in GDCM
 pub fn decode_multi_frame_compressed(
-    i_buffers: &Vec<&Vec<u8>>,
-    dims: [u32; 3],
+    i_buffers: &[&[u8]],
+    dims: &[u32; 3],
     pi_type: GDCMPhotometricInterpretation,
     ts_type: GDCMTransferSyntax,
     samples_per_pixel: u16,
@@ -193,7 +167,7 @@ pub fn decode_multi_frame_compressed(
         .map(|&i_buffer| i_buffer.as_ptr())
         .collect();
     let ret = unsafe {
-        c_decode_multi_frame_compressed(
+        c_decode_frames(
             i_buffer_pointers.as_ptr(),
             i_buffer_lens.as_ptr(),
             i_buffers.len(),

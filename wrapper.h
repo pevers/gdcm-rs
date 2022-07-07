@@ -20,7 +20,7 @@ extern "C"
         size_t size;
     };
 
-    MODULE_API PixelData c_decode_multi_frame_compressed(
+    MODULE_API PixelData c_decode_frames(
         char **,         // i_buffer_ptrs
         size_t *,        // i_buffer_lens
         size_t,          // i_buffer_len
@@ -33,21 +33,6 @@ extern "C"
         unsigned short,  // high_bit
         unsigned short   // pixel_representation
     );
-
-    MODULE_API PixelData c_decode_single_frame_compressed(
-        char *,         // i_buffer_ptr
-        size_t,         // i_buffer_len
-        unsigned int,   // width
-        unsigned int,   // height
-        unsigned int,   // pi_type
-        unsigned int,   // ts_type
-        unsigned short, // samples_per_pixel
-        unsigned short, // bits_allocated
-        unsigned short, // bits_stored
-        unsigned short, // high_bit
-        unsigned short  // pixel_representation
-    );
-
 #ifdef __cplusplus
 }
 #endif
