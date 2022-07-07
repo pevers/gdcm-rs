@@ -135,7 +135,7 @@ pub fn decode_single_frame_compressed(
     pixel_representation: u16,
 ) -> Result<Box<[u8]>, Error> {
     let i_buffers = [i_buffer];
-    let dims = [1, width, height];
+    let dims = [width, height, 1];
     decode_multi_frame_compressed(
         &i_buffers,
         &dims,
