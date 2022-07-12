@@ -4,9 +4,14 @@ use strum_macros::EnumString;
 use snafu::Snafu;
 
 #[derive(Debug, Snafu)]
-pub enum Error {
-    #[snafu(display("GDCM decoding error"))]
-    GdcmDecodingError
+pub struct Error(InnerError);
+
+#[derive(Debug, Snafu)]
+enum InnerError {
+    #[snafu(display("GDCM decoding error (status code {})", status))]
+    GdcmDecodingError {
+        status: u32,
+    }
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -151,6 +156,8 @@ pub fn decode_single_frame_compressed(
             let slice = slice::from_raw_parts_mut(ret.pixel_data as *mut _, ret.size);
             Ok(Box::from_raw(slice))
         },
-        _ => GdcmDecodingError.fail()
+        c => GdcmDecodingSnafu {
+            status: c as u32
+        }.fail().map_err(Error::from)
     }
 }
