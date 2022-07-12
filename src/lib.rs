@@ -161,11 +161,8 @@ pub fn decode_multi_frame_compressed(
     high_bit: u16,
     pixel_representation: u16,
 ) -> Result<Box<[u8]>, Error> {
-    let i_buffer_lens: Vec<usize> = i_buffers.iter().map(|&fragment| fragment.len()).collect();
-    let i_buffer_pointers: Vec<_> = i_buffers
-        .iter()
-        .map(|&i_buffer| i_buffer.as_ptr())
-        .collect();
+    let i_buffer_lens: Vec<usize> = i_buffers.iter().map(|fragment| fragment.len()).collect();
+    let i_buffer_pointers: Vec<_> = i_buffers.iter().map(|i_buffer| i_buffer.as_ptr()).collect();
     let ret = unsafe {
         c_decode_frames(
             i_buffer_pointers.as_ptr(),
