@@ -53,3 +53,8 @@ struct PixelData c_decode_frames(
     outputStruct.status = 0;
     return outputStruct;
 }
+
+void c_free_buffer(char *buffer_ptr)
+{
+    free(buffer_ptr);
+}

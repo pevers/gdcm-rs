@@ -33,6 +33,8 @@ extern "C"
         unsigned short,  // high_bit
         unsigned short   // pixel_representation
     );
+
+    MODULE_API void c_free_buffer(char *);
 #ifdef __cplusplus
 }
 #endif

@@ -119,6 +119,8 @@ extern "C" {
         high_bit: u16,
         pixel_representation: u16,
     ) -> pixel_data;
+
+    fn c_free_buffer(buffer_ptr: *const c_uchar);
 }
 
 /// Decodes a single frame buffer in GDCM
@@ -133,7 +135,7 @@ pub fn decode_single_frame_compressed(
     bits_stored: u16,
     high_bit: u16,
     pixel_representation: u16,
-) -> Result<Box<[u8]>, Error> {
+) -> Result<Vec<u8>, Error> {
     let i_buffers = [i_buffer];
     let dims = [width, height, 1];
     decode_multi_frame_compressed(
@@ -160,7 +162,7 @@ pub fn decode_multi_frame_compressed(
     bits_stored: u16,
     high_bit: u16,
     pixel_representation: u16,
-) -> Result<Box<[u8]>, Error> {
+) -> Result<Vec<u8>, Error> {
     let i_buffer_lens: Vec<usize> = i_buffers.iter().map(|fragment| fragment.len()).collect();
     let i_buffer_pointers: Vec<_> = i_buffers.iter().map(|i_buffer| i_buffer.as_ptr()).collect();
     let ret = unsafe {
@@ -180,8 +182,9 @@ pub fn decode_multi_frame_compressed(
     };
     match ret.status {
         0 => unsafe {
-            let slice = slice::from_raw_parts_mut(ret.pixel_data as *mut _, ret.size);
-            Ok(Box::from_raw(slice))
+            let vec = slice::from_raw_parts_mut(ret.pixel_data as *mut _, ret.size).to_vec();
+            c_free_buffer(ret.pixel_data);
+            Ok(vec)
         },
         c => GdcmDecodingSnafu { status: c as u32 }
             .fail()
