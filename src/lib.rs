@@ -15,7 +15,7 @@ enum InnerError {
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 /// PhotometricInterpretation Type for GDCM
-#[derive(Debug, PartialEq, EnumString, Clone)]
+#[derive(Debug, PartialEq, EnumString, Clone, Copy)]
 #[allow(non_camel_case_types)]
 pub enum GDCMPhotometricInterpretation {
     UNKNOWN = 0,
@@ -38,7 +38,7 @@ pub enum GDCMPhotometricInterpretation {
 pub type InvalidGDCMPI = strum::ParseError;
 
 /// GDCM TransferSyntax encodings for GDCM
-#[derive(Debug, PartialEq, EnumString, Clone)]
+#[derive(Debug, PartialEq, EnumString, Clone, Copy)]
 #[allow(non_camel_case_types)]
 pub enum GDCMTransferSyntax {
     #[strum(serialize = "1.2.840.10008.1.2")]
