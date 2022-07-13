@@ -8,14 +8,14 @@ struct PixelData c_decode_frames(
     char **i_buffer_ptr,
     size_t *i_buffer_lens,
     size_t i_buffer_len,
-    unsigned int dims[3],
-    unsigned int pi_type,
-    unsigned int ts_type,
-    unsigned short samples_per_pixel,
-    unsigned short bits_allocated,
-    unsigned short bits_stored,
-    unsigned short high_bit,
-    unsigned short pixel_representation)
+    u_int32_t dims[3],
+    u_int32_t pi_type,
+    u_int32_t ts_type,
+    u_int16_t samples_per_pixel,
+    u_int16_t bits_allocated,
+    u_int16_t bits_stored,
+    u_int16_t high_bit,
+    u_int16_t pixel_representation)
 {
     // Create fragment
     // We need a SmartPointer because of a GDCM bug

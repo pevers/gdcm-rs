@@ -1,4 +1,4 @@
-use libc::{c_uchar, c_uint, size_t};
+use libc::{c_uchar, size_t};
 use snafu::Snafu;
 use std::slice;
 use strum_macros::EnumString;
@@ -100,7 +100,7 @@ pub type InvalidGDCMTS = strum::ParseError;
 #[repr(C)]
 struct pixel_data {
     pixel_data: *const c_uchar,
-    status: c_uint,
+    status: u32,
     size: size_t,
 }
 
