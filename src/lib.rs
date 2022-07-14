@@ -144,10 +144,11 @@ impl Drop for PixelData {
 }
 
 impl PixelData {
-    pub fn new(data: *const u8, size: usize) -> Result<Self> {
+    unsafe fn new(data: *const u8, size: usize) -> Result<Self> {
         let data = NonNull::new(data as *mut _).context(PixelDataInvalidPointerSnafu)?;
         Ok(Self { size, data })
     }
+
     pub fn data(&self) -> &[u8] {
         unsafe { slice::from_raw_parts_mut(self.data.as_ptr() as *mut _, self.size) }
     }
@@ -215,7 +216,7 @@ pub fn decode_multi_frame_compressed(
         )
     };
     match ret.status {
-        0 => PixelData::new(ret.pixel_data, ret.size),
+        0 => unsafe { PixelData::new(ret.pixel_data, ret.size) },
         c => GdcmDecodingSnafu { status: c as u32 }
             .fail()
             .map_err(Error::from),
