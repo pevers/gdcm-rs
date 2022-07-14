@@ -1,6 +1,6 @@
 use libc::{c_uchar, size_t};
 use snafu::Snafu;
-use std::slice;
+use std::{ptr::NonNull, slice};
 use strum_macros::EnumString;
 
 #[derive(Debug, Snafu)]
@@ -98,7 +98,7 @@ pub type InvalidGDCMTS = strum::ParseError;
 
 /// Pixel data managed by GDCM
 #[repr(C)]
-struct pixel_data {
+struct PixelDataInternal {
     pixel_data: *const c_uchar,
     status: u32,
     size: size_t,
@@ -118,9 +118,40 @@ extern "C" {
         bits_stored: u16,
         high_bit: u16,
         pixel_representation: u16,
-    ) -> pixel_data;
+    ) -> PixelDataInternal;
 
     fn c_free_buffer(buffer_ptr: *const c_uchar);
+}
+
+/// Wraps the returned pixeldata
+///
+/// Exposes the data via a reference and cleans up
+/// allocated data on c side on drop of the struct
+pub struct PixelData {
+    size: usize,
+    data: NonNull<u8>,
+}
+
+impl Drop for PixelData {
+    fn drop(&mut self) {
+        unsafe {
+            c_free_buffer(self.data.as_ptr());
+        }
+    }
+}
+
+impl PixelData {
+    pub fn new(data: *const u8, size: usize) -> Self {
+        let data = NonNull::new(data as *mut _).expect("ptr is null!");
+        Self { size, data }
+    }
+    pub fn data(&self) -> &[u8] {
+        unsafe { slice::from_raw_parts_mut(self.data.as_ptr() as *mut _, self.size) }
+    }
+
+    pub fn to_vec(&self) -> Vec<u8> {
+        self.data().to_vec()
+    }
 }
 
 /// Decodes a single frame buffer in GDCM
@@ -135,7 +166,7 @@ pub fn decode_single_frame_compressed(
     bits_stored: u16,
     high_bit: u16,
     pixel_representation: u16,
-) -> Result<Vec<u8>, Error> {
+) -> Result<PixelData, Error> {
     let i_buffers = [i_buffer];
     let dims = [width, height, 1];
     decode_multi_frame_compressed(
@@ -162,7 +193,7 @@ pub fn decode_multi_frame_compressed(
     bits_stored: u16,
     high_bit: u16,
     pixel_representation: u16,
-) -> Result<Vec<u8>, Error> {
+) -> Result<PixelData, Error> {
     let i_buffer_lens: Vec<usize> = i_buffers.iter().map(|fragment| fragment.len()).collect();
     let i_buffer_pointers: Vec<_> = i_buffers.iter().map(|i_buffer| i_buffer.as_ptr()).collect();
     let ret = unsafe {
@@ -181,11 +212,10 @@ pub fn decode_multi_frame_compressed(
         )
     };
     match ret.status {
-        0 => unsafe {
-            let vec = slice::from_raw_parts_mut(ret.pixel_data as *mut _, ret.size).to_vec();
-            c_free_buffer(ret.pixel_data);
-            Ok(vec)
-        },
+        0 => {
+            let pixel_data = PixelData::new(ret.pixel_data, ret.size);
+            Ok(pixel_data)
+        }
         c => GdcmDecodingSnafu { status: c as u32 }
             .fail()
             .map_err(Error::from),

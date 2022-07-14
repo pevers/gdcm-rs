@@ -4,7 +4,7 @@
 
 using namespace std;
 
-struct PixelData c_decode_frames(
+struct PixelDataInternal c_decode_frames(
     char **i_buffer_ptr,
     size_t *i_buffer_lens,
     size_t i_buffer_len,
@@ -41,7 +41,7 @@ struct PixelData c_decode_frames(
     image.SetTransferSyntax(gdcm::TransferSyntax(gdcm::TransferSyntax::TSType(ts_type)));
     image.SetPixelFormat(gdcm::PixelFormat(samples_per_pixel, bits_allocated, bits_stored, high_bit, pixel_representation));
 
-    struct PixelData outputStruct;
+    struct PixelDataInternal outputStruct;
     size_t length = image.GetBufferLength();
     outputStruct.buffer = (char *)malloc(length);
     if (!image.GetBuffer(outputStruct.buffer))

@@ -13,14 +13,14 @@ extern "C"
 #define MODULE_API
 #endif
 
-    struct PixelData
+    struct PixelDataInternal
     {
         char *buffer;
         u_int32_t status;
         size_t size;
     };
 
-    MODULE_API PixelData c_decode_frames(
+    MODULE_API PixelDataInternal c_decode_frames(
         char **,      // i_buffer_ptrs
         size_t *,     // i_buffer_lens
         size_t,       // i_buffer_len
