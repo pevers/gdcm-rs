@@ -1,5 +1,5 @@
 use libc::{c_uchar, size_t};
-use snafu::Snafu;
+use snafu::{OptionExt, Snafu};
 use std::{ptr::NonNull, slice};
 use strum_macros::EnumString;
 
@@ -10,6 +10,9 @@ pub struct Error(InnerError);
 enum InnerError {
     #[snafu(display("GDCM decoding error (status code {})", status))]
     GdcmDecodingError { status: u32 },
+
+    #[snafu(display("Invalid pointer provided to PixelData"))]
+    PixelDataInvalidPointer,
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -141,9 +144,9 @@ impl Drop for PixelData {
 }
 
 impl PixelData {
-    pub fn new(data: *const u8, size: usize) -> Self {
-        let data = NonNull::new(data as *mut _).expect("ptr is null!");
-        Self { size, data }
+    pub fn new(data: *const u8, size: usize) -> Result<Self> {
+        let data = NonNull::new(data as *mut _).context(PixelDataInvalidPointerSnafu)?;
+        Ok(Self { size, data })
     }
     pub fn data(&self) -> &[u8] {
         unsafe { slice::from_raw_parts_mut(self.data.as_ptr() as *mut _, self.size) }
@@ -212,10 +215,7 @@ pub fn decode_multi_frame_compressed(
         )
     };
     match ret.status {
-        0 => {
-            let pixel_data = PixelData::new(ret.pixel_data, ret.size);
-            Ok(pixel_data)
-        }
+        0 => PixelData::new(ret.pixel_data, ret.size),
         c => GdcmDecodingSnafu { status: c as u32 }
             .fail()
             .map_err(Error::from),
