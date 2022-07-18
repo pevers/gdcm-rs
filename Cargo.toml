@@ -19,8 +19,8 @@ cc = "1.0.67"
 [dependencies]
 libc = "0.2.88"
 snafu = "0.7.1"
-strum = "0.20"
-strum_macros = "0.20"
+strum = "0.24.1"
+strum_macros = "0.24.2"
 
 [lib]
 name = "gdcm_rs"
