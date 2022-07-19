@@ -14,7 +14,7 @@ edition = "2018"
 
 [build-dependencies]
 cmake = "0.1"
-cc = "1.0.67"
+cc = "1.0"
 
 [dependencies]
 libc = "0.2.88"
