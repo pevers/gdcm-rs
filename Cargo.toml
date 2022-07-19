@@ -14,11 +14,11 @@ edition = "2018"
 
 [build-dependencies]
 cmake = "0.1"
-cc = "1.0.67"
+cc = "1.0"
 
 [dependencies]
-libc = "0.2.88"
-snafu = "0.7.1"
+libc = "0.2"
+snafu = "0.7"
 strum = "0.20"
 strum_macros = "0.20"
 
