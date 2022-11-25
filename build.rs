@@ -52,7 +52,7 @@ fn build() {
     println!("cargo:rustc-link-lib=static=gdcmMEXD");
     println!("cargo:rustc-link-lib=static=gdcmzlib");
 
-    #[cfg(not(feature="disable-charls"))]
+    #[cfg(feature="charls")]
     println!("cargo:rustc-link-lib=static=gdcmcharls");
 
     // FIXME: OSX ONLY

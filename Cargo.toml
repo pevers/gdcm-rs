@@ -27,4 +27,4 @@ name = "gdcm_rs"
 path = "src/lib.rs"
 
 [features]
-disable-charls = []
+charls = []
