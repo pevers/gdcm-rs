@@ -27,4 +27,5 @@ name = "gdcm_rs"
 path = "src/lib.rs"
 
 [features]
+default = ["charls"]
 charls = []
