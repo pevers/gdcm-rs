@@ -25,3 +25,7 @@ strum_macros = "0.24.2"
 [lib]
 name = "gdcm_rs"
 path = "src/lib.rs"
+
+[features]
+default = ["charls"]
+charls = []

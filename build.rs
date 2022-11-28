@@ -39,7 +39,6 @@ fn build() {
 
     // gdcm libs
     println!("cargo:rustc-link-lib=static=gdcmMSFF");
-    println!("cargo:rustc-link-lib=static=gdcmcharls");
     println!("cargo:rustc-link-lib=static=gdcmCommon");
     println!("cargo:rustc-link-lib=static=gdcmDICT");
     println!("cargo:rustc-link-lib=static=gdcmDSED");
@@ -52,6 +51,9 @@ fn build() {
     println!("cargo:rustc-link-lib=static=gdcmuuid");
     println!("cargo:rustc-link-lib=static=gdcmMEXD");
     println!("cargo:rustc-link-lib=static=gdcmzlib");
+
+    #[cfg(feature="charls")]
+    println!("cargo:rustc-link-lib=static=gdcmcharls");
 
     // FIXME: OSX ONLY
     println!("Building for {}", env::consts::OS);
