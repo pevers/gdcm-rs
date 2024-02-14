@@ -52,7 +52,7 @@ fn build() {
     println!("cargo:rustc-link-lib=static=gdcmMEXD");
     println!("cargo:rustc-link-lib=static=gdcmzlib");
 
-    #[cfg(feature="charls")]
+    #[cfg(feature = "charls")]
     println!("cargo:rustc-link-lib=static=gdcmcharls");
 
     // FIXME: OSX ONLY
@@ -61,8 +61,7 @@ fn build() {
         "macos" => {
             println!("cargo:rustc-link-lib=framework=CoreFoundation");
             println!(
-                "cargo:rustc-link-search=framework={}",
-                "/System/Library/Frameworks"
+                "cargo:rustc-link-search=framework=/System/Library/Frameworks"
             );
         }
         _ => {
@@ -83,7 +82,7 @@ fn main() {
     // update git
     if !Path::new("GDCM/.git").exists() {
         let _ = Command::new("git")
-            .args(&["submodule", "update", "--init"])
+            .args(["submodule", "update", "--init"])
             .status();
     }
 
