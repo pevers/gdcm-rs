@@ -12,7 +12,6 @@ fn build() {
         .define("GDCM_DOCUMENTATION", "OFF")
         .define("GDCM_BUILD_EXAMPLES", "OFF")
         .define("GDCM_BUILD_DOCBOOK_MANPAGES", "OFF")
-        .cflag("-fPIC")
         .cxxflag("-std=c++11")
         .uses_cxx11()
         .build();
@@ -25,7 +24,6 @@ fn build() {
     cc::Build::new()
         .file("gdcm_wrapper.cc")
         .cpp(true)
-        .flag("-fPIC")
         .flag("-std=c++11")
         .include(include_dir)
         .compile("gdcm_wrapper");
@@ -48,24 +46,28 @@ fn build() {
     println!("cargo:rustc-link-lib=static=gdcmjpeg16");
     println!("cargo:rustc-link-lib=static=gdcmjpeg8");
     println!("cargo:rustc-link-lib=static=gdcmopenjp2");
-    println!("cargo:rustc-link-lib=static=gdcmuuid");
+    if env::consts::OS != "windows" {
+        println!("cargo:rustc-link-lib=static=gdcmuuid");
+    }
     println!("cargo:rustc-link-lib=static=gdcmMEXD");
     println!("cargo:rustc-link-lib=static=gdcmzlib");
 
     #[cfg(feature = "charls")]
     println!("cargo:rustc-link-lib=static=gdcmcharls");
 
-    // FIXME: OSX ONLY
     println!("Building for {}", env::consts::OS);
     match env::consts::OS {
         "macos" => {
             println!("cargo:rustc-link-lib=framework=CoreFoundation");
-            println!(
-                "cargo:rustc-link-search=framework=/System/Library/Frameworks"
-            );
+            println!("cargo:rustc-link-search=framework=/System/Library/Frameworks");
+        }
+        "windows" => {
+            println!("cargo:rustc-link-lib=dylib=rpcrt4");
+            println!("cargo:rustc-link-lib=dylib=crypt32");
+            println!("cargo:rustc-link-lib=static=socketxx");
         }
         _ => {
-            // Probably not supported
+            println!("cargo:rustc-link-lib=dylib=stdc++");
         }
     };
 }
