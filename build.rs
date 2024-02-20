@@ -12,8 +12,7 @@ fn build() {
         .define("GDCM_DOCUMENTATION", "OFF")
         .define("GDCM_BUILD_EXAMPLES", "OFF")
         .define("GDCM_BUILD_DOCBOOK_MANPAGES", "OFF")
-        .cxxflag("-std=c++11")
-        .uses_cxx11()
+        .define("CMAKE_CXX_STANDARD", "14")
         .build();
 
     // set GDCM include path
@@ -24,7 +23,7 @@ fn build() {
     cc::Build::new()
         .file("gdcm_wrapper.cc")
         .cpp(true)
-        .flag("-std=c++11")
+        .std("c++14")
         .include(include_dir)
         .compile("gdcm_wrapper");
 
