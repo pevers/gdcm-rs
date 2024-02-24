@@ -217,7 +217,7 @@ pub fn decode_multi_frame_compressed(
     };
     match ret.status {
         0 => unsafe { PixelData::new(ret.pixel_data, ret.size) },
-        c => GdcmDecodingSnafu { status: c as u32 }
+        c => GdcmDecodingSnafu { status: c }
             .fail()
             .map_err(Error::from),
     }

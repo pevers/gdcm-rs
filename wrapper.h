@@ -1,3 +1,9 @@
+#ifdef _WIN32
+#include <cstdint>
+typedef uint16_t u_int16_t;
+typedef uint32_t u_int32_t;
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
